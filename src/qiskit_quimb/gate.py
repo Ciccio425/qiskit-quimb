@@ -198,6 +198,22 @@ def _(op: Instruction, qubits: Sequence[int], kwargs: dict[str, Any]):
 def _(op: Instruction, qubits: Sequence[int], kwargs: dict[str, Any]):
     return quimb.tensor.Gate("Z", params=[], qubits=qubits, **kwargs)
 
+@_register_gate_func("pauli")
+def _(op: Instruction, qubits: Sequence[int], kwargs: dict[str, Any]):
+    if op.params:
+        pauli_str = str(op.params[0])
+    elif op.label:
+        pauli_str = op.label
+    else:
+        raise ValueError("Pauli instruction has no Pauli string information.")
+    pauli_str = pauli_str.upper()
+    if len(pauli_str) == 1:
+        gate_name = "PAULI1"
+    elif len(pauli_str) == 2:
+        gate_name = "PAULI2"
+    else:
+        raise ValueError("Only one- and two-qubit Pauli gates are supported.")
+    return quimb.tensor.Gate(gate_name, params=[pauli_str], qubits=qubits, **kwargs)
 
 def quimb_gate(
     op: Instruction, qubits: Sequence[int], **kwargs
